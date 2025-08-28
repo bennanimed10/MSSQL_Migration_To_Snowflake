@@ -18,6 +18,10 @@ import gzip
 import shutil
 from pathlib import Path
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -52,7 +56,15 @@ def get_connection(args):
         if args.use_trusted_connection:
             conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={args.server};DATABASE={args.database};Trusted_Connection=yes;'
         else:
-            conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={args.server};DATABASE={args.database};UID={args.username};PWD={args.password}'
+            # Use environment variables for sensitive information if available
+            username = args.username or os.environ.get('SQL_USERNAME')
+            password = args.password or os.environ.get('SQL_PASSWORD')
+            
+            if not username or not password:
+                logger.error("SQL Server username and password must be provided via arguments or environment variables")
+                sys.exit(1)
+                
+            conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={args.server};DATABASE={args.database};UID={username};PWD={password}'
         
         return pyodbc.connect(conn_str)
     except pyodbc.Error as e:
@@ -115,7 +127,23 @@ def export_table_to_csv(conn, schema, table, output_dir):
 
 def upload_to_s3(file_path, bucket, s3_key):
     """Upload a file to S3."""
-    s3_client = boto3.client('s3')
+    # Use environment variables for AWS credentials if not already configured
+    aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+    aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    aws_region = os.environ.get('AWS_REGION', 'us-east-1')
+    
+    # Create S3 client with or without explicit credentials
+    if aws_access_key and aws_secret_key:
+        s3_client = boto3.client(
+            's3',
+            region_name=aws_region,
+            aws_access_key_id=aws_access_key,
+            aws_secret_access_key=aws_secret_key
+        )
+    else:
+        # Use default credential provider chain (environment, ~/.aws/credentials, IAM role)
+        s3_client = boto3.client('s3', region_name=aws_region)
+    
     try:
         logger.info(f"Uploading {file_path} to s3://{bucket}/{s3_key}")
         s3_client.upload_file(file_path, bucket, s3_key)
@@ -157,4 +185,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

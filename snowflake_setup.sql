@@ -19,9 +19,10 @@ CREATE OR REPLACE FILE FORMAT CAS_DATA.RAW.CSV_FORMAT
     COMPRESSION = GZIP;
 
 -- Create external stage pointing to S3
+-- Note: Replace the placeholders with your actual values or use Snowflake variables
 CREATE OR REPLACE STAGE CAS_DATA.RAW.S3_STAGE
     URL = 's3://my-data-pipeline-bucket/raw-data'
-    CREDENTIALS = (AWS_KEY_ID = 'your_access_key' AWS_SECRET_KEY = 'your_secret_key')
+    CREDENTIALS = (AWS_KEY_ID = '${AWS_ACCESS_KEY_ID}' AWS_SECRET_KEY = '${AWS_SECRET_ACCESS_KEY}')
     FILE_FORMAT = CAS_DATA.RAW.CSV_FORMAT;
 
 -- Create example tables for raw data
@@ -147,9 +148,9 @@ GRANT CREATE VIEW ON SCHEMA CAS_DATA.MARTS TO ROLE DBT_ROLE;
 GRANT USAGE ON WAREHOUSE DBT_WH TO ROLE DBT_ROLE;
 
 -- Create a user for dbt (replace with your own secure password)
+-- Note: Use a secure password management solution in production
 CREATE USER IF NOT EXISTS DBT_USER
-    PASSWORD = 'YourSecurePassword123'
+    PASSWORD = '${DBT_USER_PASSWORD}' -- Set this as a Snowflake session variable before running
     DEFAULT_ROLE = DBT_ROLE
     DEFAULT_WAREHOUSE = DBT_WH;
 GRANT ROLE DBT_ROLE TO USER DBT_USER;
-
