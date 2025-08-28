@@ -1,0 +1,40 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ var('raw_database', target.database) }}"
+    schema: "{{ var('raw_schema', 'raw') }}"
+    tables:
+      - name: tbl_contract
+        description: Contract data from SQL Server
+        columns:
+          - name: contract_id
+            description: Primary key for the contract
+            tests:
+              - unique
+              - not_null
+          - name: _snapshot_timestamp
+            description: Timestamp when the data was exported from SQL Server
+      
+      - name: tbl_customer
+        description: Customer data from SQL Server
+        columns:
+          - name: customer_id
+            description: Primary key for the customer
+            tests:
+              - unique
+              - not_null
+          - name: _snapshot_timestamp
+            description: Timestamp when the data was exported from SQL Server
+      
+      - name: tbl_vehicle
+        description: Vehicle data from SQL Server
+        columns:
+          - name: vehicle_id
+            description: Primary key for the vehicle
+            tests:
+              - unique
+              - not_null
+          - name: _snapshot_timestamp
+            description: Timestamp when the data was exported from SQL Server
+
