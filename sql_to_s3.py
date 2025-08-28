@@ -53,8 +53,15 @@ def parse_args():
 def get_connection(args):
     """Create a connection to SQL Server."""
     try:
+        # Build connection parameters
+        conn_params = {
+            'DRIVER': '{ODBC Driver 17 for SQL Server}',
+            'SERVER': args.server,
+            'DATABASE': args.database
+        }
+        
         if args.use_trusted_connection:
-            conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={args.server};DATABASE={args.database};Trusted_Connection=yes;'
+            conn_params['Trusted_Connection'] = 'yes'
         else:
             # Use environment variables for sensitive information if available
             username = args.username or os.environ.get('SQL_USERNAME')
@@ -63,8 +70,17 @@ def get_connection(args):
             if not username or not password:
                 logger.error("SQL Server username and password must be provided via arguments or environment variables")
                 sys.exit(1)
-                
-            conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={args.server};DATABASE={args.database};UID={username};PWD={password}'
+            
+            conn_params['UID'] = username
+            conn_params['PWD'] = password
+        
+        # Build connection string from parameters
+        conn_str_parts = []
+        for key, value in conn_params.items():
+            conn_str_parts.append(f"{key}={value}")
+        
+        conn_str = ';'.join(conn_str_parts)
+        logger.info(f"Connecting to SQL Server: {args.server}, Database: {args.database}")
         
         return pyodbc.connect(conn_str)
     except pyodbc.Error as e:
