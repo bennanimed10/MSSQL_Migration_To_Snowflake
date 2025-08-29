@@ -1,0 +1,8 @@
+=== Starting Data Pipeline at Thu Aug 28 21:29:23 UTC 2025 ===
+Step 1: Exporting data from SQL Server to S3...
+Starting SQL Server to S3 export at Thu Aug 28 21:29:23 UTC 2025
+Traceback (most recent call last):
+  File "/tmp/bennanimed10/MSSQL_Migration_To_Snowflake/sql_to_s3.py", line 13, in <module>
+    import pandas as pd
+ModuleNotFoundError: No module named 'pandas'
+Export failed at Thu Aug 28 21:29:23 UTC 2025
