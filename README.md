@@ -12,7 +12,7 @@ The pipeline consists of the following components:
 2. **AWS S3 Storage**: Store the CSV files in S3 buckets with a timestamp-based folder structure
 3. **Snowflake Loading**: Load the data from S3 into Snowflake raw tables
 4. **dbt Transformations**: Transform the raw data into staging, intermediate, and mart models
-5. **Orchestration**: Coordinate the entire pipeline with shell scripts
+5. **Orchestration**: Coordinate the entire pipeline with Airflow or shell scripts
 
 ## Prerequisites
 
@@ -21,6 +21,10 @@ The pipeline consists of the following components:
 - AWS account with S3 access
 - Snowflake account
 - dbt (data build tool)
+
+For Airflow orchestration:
+- Docker and Docker Compose
+- Apache Airflow 2.5+
 
 ## Setup Instructions
 
@@ -70,7 +74,9 @@ The SQL Server database should be set up with the tables you want to export. The
 
 ## Running the Pipeline
 
-To run the complete pipeline:
+### Option 1: Shell Script Orchestration
+
+To run the complete pipeline using shell scripts:
 
 ```bash
 ./run_pipeline.sh
@@ -82,6 +88,39 @@ This script will:
 3. Load the data into Snowflake
 4. Run dbt transformations
 5. Generate documentation
+
+### Option 2: Airflow Orchestration
+
+For a more robust orchestration solution, you can use Apache Airflow:
+
+1. Navigate to the Airflow directory:
+   ```bash
+   cd airflow
+   ```
+
+2. Set up the environment:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. Start Airflow using Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. Access the Airflow UI at http://localhost:8080 (default username/password: airflow/airflow)
+
+5. Enable the `mssql_to_snowflake_pipeline` DAG in the Airflow UI
+
+The Airflow DAG provides:
+- Dynamic task generation based on tables to export
+- Task groups for SQL Server export and Snowflake loading
+- dbt integration for transformations
+- Comprehensive error handling and logging
+- Monitoring and alerting capabilities
+
+See the [Airflow README](airflow/README.md) for more details on the Airflow implementation.
 
 ## Pipeline Components
 
@@ -120,11 +159,21 @@ Snowflake is configured with:
 
 ## Maintenance and Monitoring
 
+### Shell Script Orchestration
 - Pipeline logs are stored in the `pipeline_*.log` files
 - dbt logs are available in the `logs/` directory
 - Snowflake query history can be used to monitor load operations
 
+### Airflow Orchestration
+- Airflow UI provides comprehensive monitoring of all tasks
+- Task logs are available in the Airflow UI
+- Task success/failure notifications can be configured
+- DAG runs history and statistics are available
+- Airflow metrics can be exported to monitoring systems
+
 ## Extending the Pipeline
+
+### Adding New Tables
 
 To add new tables to the pipeline:
 
@@ -133,7 +182,18 @@ To add new tables to the pipeline:
 3. Update intermediate and mart models as needed
 4. Add the table to the Snowflake load procedure
 
+When using Airflow, the DAG will automatically detect the new tables from the `tbl_CASReportTableExport` table and create the necessary tasks.
+
+### Enhancing the Airflow Implementation
+
+The Airflow implementation can be extended with:
+
+1. **Additional Error Handling**: Add more robust error handling and retry logic
+2. **Incremental Loading**: Implement incremental loading based on timestamps or change tracking
+3. **Monitoring and Alerting**: Configure email or Slack notifications for task failures
+4. **Parallel Processing**: Optimize task concurrency for better performance
+5. **CI/CD Integration**: Set up automated testing and deployment of the DAG
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
