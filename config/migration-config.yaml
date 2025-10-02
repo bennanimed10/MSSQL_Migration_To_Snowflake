@@ -1,0 +1,340 @@
+# SQL Server to Snowflake Migration Configuration
+# Update these values according to your environment
+
+# Environment Configuration
+environment: "dev"  # dev, staging, prod
+project_name: "sql-snowflake-migration"
+aws_region: "us-east-1"
+
+# SQL Server Configuration
+sql_server:
+  host: "your-sql-server.domain.com"
+  port: 1433
+  database: "YourDatabase"
+  username: "migration_user"
+  # Password should be stored in AWS Secrets Manager
+  password_secret_name: "sql-server-migration-password"
+  
+  # Connection settings
+  connection_timeout: 30
+  command_timeout: 300
+  trust_server_certificate: true
+  encrypt: true
+  
+  # CDC Configuration
+  cdc_enabled: true
+  cdc_start_from: "current"  # current, timestamp, or lsn
+  
+  # Tables to migrate (leave empty to migrate all tables)
+  include_tables: []
+  # Example:
+  # - "dbo.customers"
+  # - "dbo.orders"
+  # - "dbo.products"
+  
+  # Tables to exclude
+  exclude_tables:
+    - "dbo.sysdiagrams"
+    - "dbo.dtproperties"
+    - "dbo.*_backup"
+    - "dbo.*_temp"
+    - "dbo.*_log"
+
+# Snowflake Configuration
+snowflake:
+  account: "your-account.region.snowflakecomputing.com"
+  user: "MIGRATION_USER"
+  # Password should be stored in AWS Secrets Manager
+  password_secret_name: "snowflake-migration-password"
+  role: "MIGRATION_USER"
+  warehouse: "MIGRATION_WH"
+  database: "MIGRATION_DB"
+  schema: "PUBLIC"
+  
+  # Connection settings
+  connection_timeout: 60
+  network_timeout: 300
+  login_timeout: 60
+  
+  # Warehouse configuration
+  warehouses:
+    migration:
+      name: "MIGRATION_WH"
+      size: "MEDIUM"
+      auto_suspend: 300
+      auto_resume: true
+      min_cluster_count: 1
+      max_cluster_count: 3
+    analytics:
+      name: "ANALYTICS_WH"
+      size: "LARGE"
+      auto_suspend: 600
+      auto_resume: true
+      min_cluster_count: 1
+      max_cluster_count: 5
+
+# AWS Configuration
+aws:
+  # S3 Configuration
+  s3:
+    staging_bucket: "your-migration-staging-bucket"
+    full_load_retention_days: 30
+    cdc_retention_days: 7
+    
+    # S3 paths
+    paths:
+      dms_output: "dms-output/"
+      full_load: "dms-output/full-load/"
+      cdc: "dms-output/cdc/"
+      manual_load: "manual-load/"
+      config: "config/"
+      logs: "logs/"
+      archive: "archive/"
+  
+  # DMS Configuration
+  dms:
+    replication_instance:
+      class: "dms.t3.micro"  # dms.t3.micro, dms.t3.small, dms.t3.medium, etc.
+      allocated_storage: 100  # GB
+      multi_az: false
+      publicly_accessible: false
+      engine_version: "3.5.2"
+    
+    # Migration task settings
+    task_settings:
+      full_load:
+        target_table_prep_mode: "DO_NOTHING"
+        max_full_load_sub_tasks: 8
+        transaction_consistency_timeout: 600
+        commit_rate: 10000
+        parallel_load_threads: 4
+      
+      cdc:
+        batch_apply_enabled: true
+        batch_apply_timeout_min: 1
+        batch_apply_timeout_max: 30
+        batch_apply_memory_limit: 500
+        memory_limit_total: 1024
+  
+  # Lambda Configuration
+  lambda:
+    timeout: 300  # seconds
+    memory_size: 512  # MB
+    runtime: "python3.9"
+    
+    # Environment variables
+    environment_variables:
+      LOG_LEVEL: "INFO"
+      ENABLE_DEBUG: "false"
+  
+  # SNS Configuration
+  sns:
+    notification_emails:
+      - "admin@yourcompany.com"
+      - "data-team@yourcompany.com"
+    
+    # Notification settings
+    notifications:
+      success: true
+      errors: true
+      warnings: true
+      daily_summary: true
+  
+  # CloudWatch Configuration
+  cloudwatch:
+    log_retention_days: 14
+    enable_detailed_monitoring: true
+    
+    # Custom metrics
+    metrics:
+      namespace: "Migration/SQLServer-Snowflake"
+      enable_custom_metrics: true
+    
+    # Alarms
+    alarms:
+      migration_failures:
+        threshold: 5
+        period: 300
+        evaluation_periods: 2
+      cdc_lag_minutes:
+        threshold: 15
+        period: 300
+        evaluation_periods: 3
+
+# Migration Settings
+migration:
+  # Batch processing
+  batch_size: 10000
+  max_parallel_tasks: 5
+  retry_count: 3
+  retry_delay_seconds: 60
+  
+  # Data validation
+  validation:
+    enabled: true
+    row_count_validation: true
+    data_type_validation: true
+    null_value_validation: true
+    primary_key_validation: true
+    sample_data_validation: true
+    sample_size: 1000
+  
+  # Performance settings
+  performance:
+    enable_compression: true
+    compression_type: "GZIP"
+    file_format: "PARQUET"
+    max_file_size_mb: 1024
+    partition_by_date: true
+    
+  # Error handling
+  error_handling:
+    on_error: "CONTINUE"  # CONTINUE, ABORT, SKIP_FILE
+    max_errors_per_table: 100
+    max_error_percentage: 5.0
+    log_errors: true
+    
+  # Scheduling
+  scheduling:
+    full_load_schedule: "manual"  # manual, daily, weekly
+    cdc_monitoring_interval: "5 minutes"
+    validation_schedule: "rate(6 hours)"
+    cleanup_schedule: "rate(1 day)"
+
+# Table-specific configurations
+table_configurations:
+  # Example configuration for specific tables
+  # customers:
+  #   batch_size: 5000
+  #   validation_enabled: true
+  #   custom_transformations:
+  #     - column: "phone_number"
+  #       transformation: "REGEXP_REPLACE"
+  #       pattern: "[^0-9]"
+  #       replacement: ""
+  #   clustering_keys:
+  #     - "customer_id"
+  #     - "created_date"
+  
+  # orders:
+  #   batch_size: 20000
+  #   partition_by: "order_date"
+  #   retention_days: 2555  # 7 years
+  #   clustering_keys:
+  #     - "order_id"
+  #     - "order_date"
+
+# Data transformation rules
+transformations:
+  # Global transformation rules
+  global:
+    # Convert all table names to lowercase
+    table_name_case: "lower"
+    # Convert all column names to lowercase
+    column_name_case: "lower"
+    # Handle null values
+    null_handling: "preserve"  # preserve, convert_to_empty, convert_to_default
+    
+  # Data type mappings from SQL Server to Snowflake
+  data_type_mappings:
+    "varchar": "VARCHAR"
+    "nvarchar": "VARCHAR"
+    "char": "CHAR"
+    "nchar": "CHAR"
+    "text": "VARCHAR"
+    "ntext": "VARCHAR"
+    "int": "NUMBER"
+    "bigint": "NUMBER"
+    "smallint": "NUMBER"
+    "tinyint": "NUMBER"
+    "bit": "BOOLEAN"
+    "decimal": "NUMBER"
+    "numeric": "NUMBER"
+    "float": "FLOAT"
+    "real": "FLOAT"
+    "money": "NUMBER(19,4)"
+    "smallmoney": "NUMBER(10,4)"
+    "datetime": "TIMESTAMP_NTZ"
+    "datetime2": "TIMESTAMP_NTZ"
+    "smalldatetime": "TIMESTAMP_NTZ"
+    "date": "DATE"
+    "time": "TIME"
+    "datetimeoffset": "TIMESTAMP_TZ"
+    "timestamp": "BINARY"
+    "binary": "BINARY"
+    "varbinary": "BINARY"
+    "image": "BINARY"
+    "uniqueidentifier": "VARCHAR(36)"
+    "xml": "VARIANT"
+    "geography": "GEOGRAPHY"
+    "geometry": "GEOMETRY"
+
+# Monitoring and alerting
+monitoring:
+  # Health checks
+  health_checks:
+    enabled: true
+    interval_minutes: 5
+    timeout_seconds: 30
+    
+  # Dashboard configuration
+  dashboard:
+    enabled: true
+    refresh_interval: "5 minutes"
+    retention_days: 30
+    
+  # Metrics to track
+  metrics:
+    - name: "migration_success_rate"
+      type: "percentage"
+      alert_threshold: 95
+    - name: "cdc_lag_minutes"
+      type: "gauge"
+      alert_threshold: 15
+    - name: "data_quality_score"
+      type: "percentage"
+      alert_threshold: 98
+    - name: "storage_usage_gb"
+      type: "gauge"
+      alert_threshold: 1000
+
+# Security settings
+security:
+  # Encryption
+  encryption:
+    in_transit: true
+    at_rest: true
+    kms_key_id: null  # Use default AWS managed key
+    
+  # Access control
+  access_control:
+    enable_ip_whitelist: false
+    allowed_ip_ranges: []
+    enable_mfa: false
+    
+  # Audit logging
+  audit:
+    enabled: true
+    log_all_queries: false
+    log_data_access: true
+    retention_days: 90
+
+# Cost optimization
+cost_optimization:
+  # Auto-scaling
+  auto_scaling:
+    enabled: true
+    scale_up_threshold: 80  # CPU percentage
+    scale_down_threshold: 20
+    
+  # Resource scheduling
+  resource_scheduling:
+    enable_warehouse_auto_suspend: true
+    enable_spot_instances: false  # For DMS
+    
+  # Storage optimization
+  storage:
+    enable_intelligent_tiering: true
+    enable_lifecycle_policies: true
+    compress_archived_data: true
+

@@ -1,0 +1,419 @@
+# SQL Server to Snowflake Migration - .gitignore
+
+# =====================================================
+# Environment and Configuration Files
+# =====================================================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+terraform.tfvars
+terraform.tfvars.json
+*.tfvars
+*.tfvars.json
+
+# =====================================================
+# Terraform Files
+# =====================================================
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+*tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# =====================================================
+# Python Files
+# =====================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# =====================================================
+# AWS and Cloud Files
+# =====================================================
+# AWS credentials
+.aws/
+aws-credentials.json
+
+# Lambda deployment packages
+*.zip
+lambda-deployment-*.zip
+
+# CloudFormation templates (generated)
+*-generated.yaml
+*-generated.json
+
+# =====================================================
+# Database Files
+# =====================================================
+# SQL Server backup files
+*.bak
+*.trn
+*.ldf
+
+# Database connection files
+database-connections.json
+connection-strings.txt
+
+# =====================================================
+# Logs and Temporary Files
+# =====================================================
+# Log files
+*.log
+logs/
+log/
+*.log.*
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =====================================================
+# IDE and Editor Files
+# =====================================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =====================================================
+# Data Files
+# =====================================================
+# CSV and data files (unless specifically needed)
+*.csv
+*.xlsx
+*.xls
+data/
+datasets/
+
+# Parquet files
+*.parquet
+
+# JSON data files (but not config files)
+data*.json
+export*.json
+
+# =====================================================
+# Security and Secrets
+# =====================================================
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Certificates
+*.crt
+*.cer
+
+# Secrets and passwords
+secrets.yaml
+secrets.json
+passwords.txt
+credentials.json
+
+# =====================================================
+# Build and Deployment Files
+# =====================================================
+# Build directories
+build/
+dist/
+out/
+
+# Deployment artifacts
+deployment/
+releases/
+
+# Docker files (if using containers)
+.dockerignore
+docker-compose.override.yml
+
+# =====================================================
+# Monitoring and Analytics
+# =====================================================
+# Monitoring data
+monitoring/
+metrics/
+analytics/
+
+# =====================================================
+# Backup Files
+# =====================================================
+# Backup files
+*.backup
+*.bak
+backup/
+backups/
+
+# =====================================================
+# Project Specific
+# =====================================================
+# Migration specific temporary files
+migration-temp/
+migration-logs/
+migration-data/
+
+# DMS task files (generated)
+dms-task-*.json
+
+# Snowflake query results
+query-results/
+snowflake-exports/
+
+# Validation reports
+validation-report-*.html
+validation-report-*.pdf
+data-validation-*.json
+
+# Performance test results
+performance-results/
+load-test-results/
+
+# =====================================================
+# Documentation Build Files
+# =====================================================
+# Sphinx build
+_build/
+_static/
+_templates/
+
+# MkDocs
+site/
+
+# =====================================================
+# Cache Files
+# =====================================================
+# General cache
+.cache/
+cache/
+
+# Node modules (if using any Node.js tools)
+node_modules/
+
+# =====================================================
+# Archive Files
+# =====================================================
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
+*.rar
+*.7z
+
+# =====================================================
+# Include Important Files
+# =====================================================
+# Force include certain files that might be ignored
+!.gitkeep
+!README.md
+!LICENSE
+!requirements.txt
+!setup.py
+!Makefile
+
+# Include example configuration files
+!config/*.example
+!*.example.*
+!example-*
+
+# Include documentation
+!docs/
+!*.md
+
